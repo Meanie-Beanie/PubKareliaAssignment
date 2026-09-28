@@ -8,4 +8,8 @@
     <UserSecretsId>9e77e38a-c2da-43d1-9534-64bb06c1c143</UserSecretsId>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Folder Include="Dto\" />
+  </ItemGroup>
+
 </Project>
