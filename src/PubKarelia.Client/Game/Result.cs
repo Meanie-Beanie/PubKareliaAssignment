@@ -9,9 +9,8 @@ namespace PubKarelia.Client.Game;
 
 // Originally, it had a interface but I think it is unnecessary complication at this time.
 // I will not place any constraints on the type, since the type can vary from simple data types into class structures.
-internal class Result<T>
+public sealed class Result<T>
 {
-
     public bool IsSuccess { get; init; }
     public int StatusCode { get; init; }
     public string? ErrorMessage { get; init; }
