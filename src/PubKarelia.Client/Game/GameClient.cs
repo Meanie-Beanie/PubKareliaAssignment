@@ -36,16 +36,9 @@ public class GameClient
     }
 
     // GET
-    //public async Task<Result<string>> GetJoke()
-    //{
-    //    var response = await _httpClient.GetAsync(ApiRoutes.GetJoke);
+    public async Task<Result<string>> GetJoke()
+        => await SendAsync<string>(HttpMethod.Get, ApiRoutes.GetJoke);
 
-    //    var joke = await response.Content.ReadAsStringAsync();
-
-
-
-    //    return joke;
-    //}
 
     //// GET
     //public async Task<string> ThrowDart()
