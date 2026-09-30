@@ -13,15 +13,15 @@ public sealed class Result<T>
 {
     public bool IsSuccess { get; init; }
     public int StatusCode { get; init; }
-    public string? ErrorMessage { get; init; }
+    public string? ErrorMessage { get; init; } = null;
 
     // Data is the models that we deserialize from the responses, so we are required to keep this generic.
     public T? Data { get; init; }
 
-    public Result(bool isSuccess, int errorCode, T? data, string? errorMessage)
+    public Result(bool isSuccess, int statusCode, T? data, string? errorMessage)
     {
         IsSuccess = isSuccess;
-        StatusCode = errorCode;
+        StatusCode = statusCode;
         Data = data;
         ErrorMessage = errorMessage;
     }

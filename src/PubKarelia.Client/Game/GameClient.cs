@@ -16,12 +16,16 @@ public class GameClient
         _httpClient = httpClient;
     }
 
-    //private async Task<Result<T>> SendAsync<T>()
-    //{
-
-
-    //    var response = await _httpClient.SendAsync();
-    //}
+    // Required headers are currently placed in the Main() when creating HttpClient
+    // Do we need body?
+    private async Task<Result<T>> SendAsync<T>(HttpMethod httpVerb, string requestUri)
+    {
+        HttpRequestMessage message = new HttpRequestMessage(method: httpVerb, requestUri: requestUri);
+        
+        var response = await _httpClient.SendAsync(message);
+        
+        return new Result<T>(isSuccess: true, statusCode: 200, data: content, errorMessage: null);
+    }
 
     // GET
     //public async Task<Result<string>> GetJoke()
