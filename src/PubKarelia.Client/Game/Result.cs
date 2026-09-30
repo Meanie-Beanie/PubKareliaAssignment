@@ -39,10 +39,11 @@ public sealed class Result<TValue>
         ErrorMessage = errorMessage;
     }   
 
-    public static Result<TValue> Success(TValue data)
-    => new(isSuccess: true, statusCode: 200, data: data, errorMessage: null);
+    // 200 is the most common, but there is also 201 and I feel like I am forgetting something else as well, but let's make that default.
+    public static Result<TValue> Success(TValue data, int statusCode = 200)
+    => new(isSuccess: true, statusCode: statusCode, data: data, errorMessage: null);
 
-    // We have to return default of the data type for now bu
-    public static Result<TValue> Failure(TValue data, int statusCode, string errorMessage)
+    // We have to return default of the data type for now.
+    public static Result<TValue> Failure(int statusCode, string errorMessage)
     => new(isSuccess: false, statusCode: statusCode, data: default, errorMessage: errorMessage);
 }
