@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Text.Json;
-using System.Text.Json.Serialization;
+using System.Net;
 
 namespace PubKarelia.Client.Game;
 
@@ -20,23 +20,40 @@ public class GameClient
 
     // Required headers are currently placed in the Main() when creating HttpClient
     // Do we need body?
-    private async Task<Result<T>> SendAsync<T>(HttpMethod httpVerb, string requestUri)
+    private async Task<ApiResult<T>> SendAsync<T>(HttpMethod httpVerb, string requestUri)
     {
-        HttpRequestMessage message = new HttpRequestMessage(method: httpVerb, requestUri: requestUri);
+        try
+        {
+            HttpRequestMessage message = new HttpRequestMessage(method: httpVerb, requestUri: requestUri);
+
+            var response = await _httpClient.SendAsync(message);
+
+            // Should we throw or handle the error codes manually?
+            // But how many different error codes are there in the api docs? Maybe map them out and figure out, since we do want to inform users 
+            response.EnsureSuccessStatusCode();
+
+            // if it has body
+            var body = await response.Content.ReadAsStringAsync();
+
+            var content = JsonSerializer.Deserialize<T>(body);
+
+            return ApiResult<T>.Success(content);
+        }
         
-        var response = await _httpClient.SendAsync(message);
+        catch (HttpRequestException ex)
+        {
+            return ApiResult<T>.Failure(HttpStatusCode.BadRequest, $"{ex.Message}"); // Does not work properly, read comments above.
+        }
 
-
-        // if it has body
-        var body = await response.Content.ReadAsStringAsync();
-
-        var content = JsonSerializer.Deserialize<T>(body);
-
-        return Result<T>.Success(content); ;
+        // This is kinda the downside of HttpStatusCode in this situation, since we are smuggling our potential server issue as api server issue.
+        catch (JsonException ex)
+        {
+            return ApiResult<T>.Failure(HttpStatusCode.BadRequest, $"{ex.Message}");
+        }
     }
 
     // GET
-    public async Task<Result<string>> GetJoke()
+    public async Task<ApiResult<string>> GetJoke()
         => await SendAsync<string>(HttpMethod.Get, ApiRoutes.GetJoke);
 
 
