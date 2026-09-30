@@ -5,7 +5,8 @@ using System.Text;
 namespace PubKarelia.Client.Game;
 
 // Built upon the 'Result' -pattern
-
+// https://codewithmukesh.com/blog/result-pattern-dotnet/
+// https://www.linkedin.com/pulse/result-pattern-c-comprehensive-guide-andre-baltieri-wieuf
 
 // Originally, it had a interface but I think it is unnecessary complication at this time.
 // I will not place any constraints on the type, since the type can vary from simple data types into class structures.
@@ -30,7 +31,7 @@ public sealed class Result<TValue>
             => _data = value;
     }
 
-    public Result(bool isSuccess, int statusCode, TValue? data, string? errorMessage)
+    private Result(bool isSuccess, int statusCode, TValue? data, string? errorMessage)
     {
         IsSuccess = isSuccess;
         StatusCode = statusCode;
