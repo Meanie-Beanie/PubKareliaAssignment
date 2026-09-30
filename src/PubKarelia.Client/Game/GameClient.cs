@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace PubKarelia.Client.Game;
 
@@ -23,8 +25,14 @@ public class GameClient
         HttpRequestMessage message = new HttpRequestMessage(method: httpVerb, requestUri: requestUri);
         
         var response = await _httpClient.SendAsync(message);
-        
-        return new Result<T>(isSuccess: true, statusCode: 200, data: content, errorMessage: null);
+
+
+        // if it has body
+        var body = await response.Content.ReadAsStringAsync();
+
+        var content = JsonSerializer.Deserialize<T>(body);
+
+        return Result<T>.Success(content); ;
     }
 
     // GET
