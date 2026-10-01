@@ -37,6 +37,9 @@ public class GameClient
             else if (response.StatusCode == HttpStatusCode.BadRequest)
                 return ApiResult<T>.Failure(HttpStatusCode.BadRequest, "Unable to do the action in current location.");
 
+            // catch anything else.
+            response.EnsureSuccessStatusCode();
+
             var body = await response.Content.ReadAsStringAsync();
 
             var content = JsonSerializer.Deserialize<T>(body);
