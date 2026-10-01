@@ -28,24 +28,30 @@ public class GameClient
 
             var response = await _httpClient.SendAsync(message);
 
-            // Should we throw or handle the error codes manually?
-            // But how many different error codes are there in the api docs? Maybe map them out and figure out, since we do want to inform users 
-            response.EnsureSuccessStatusCode();
+            // 401 Unauthorized
+            if (response.StatusCode == HttpStatusCode.Unauthorized)
+                return ApiResult<T>.Failure(HttpStatusCode.Unauthorized, "TIKO AUTH -header missing.");
 
-            // if it has body
+            // 400 Bad Request
+            // Think about this later, since body content might contain interesting details.
+            else if (response.StatusCode == HttpStatusCode.BadRequest)
+                return ApiResult<T>.Failure(HttpStatusCode.BadRequest, "Unable to do the action in current location.");
+
             var body = await response.Content.ReadAsStringAsync();
 
             var content = JsonSerializer.Deserialize<T>(body);
-
+            
             return ApiResult<T>.Success(content);
         }
         
+        // Catches any other HttpRequest Exception, Try no longer throws exception through EnsureSuccessStatusCode
         catch (HttpRequestException ex)
         {
-            return ApiResult<T>.Failure(HttpStatusCode.BadRequest, $"{ex.Message}"); // Does not work properly, read comments above.
+            return ApiResult<T>.Failure(HttpStatusCode.BadRequest, $"{ex.Message}");
         }
 
         // This is kinda the downside of HttpStatusCode in this situation, since we are smuggling our potential server issue as api server issue.
+        // Could set it to nullable and have null for these scenarios, but is that good design?
         catch (JsonException ex)
         {
             return ApiResult<T>.Failure(HttpStatusCode.BadRequest, $"{ex.Message}");
