@@ -46,6 +46,12 @@ public class GameClient
             if (string.IsNullOrWhiteSpace(body))
                 return ApiResult<T>.Success(default); 
 
+            /*
+             * TO-DO:
+             * CHECK THE SERIALIZER OPTIONS
+             * NEWTONSOFT AND NET SERIALIZER HAVE DIFFERENT BEHAVIORS WITH SPECIFIC ASPECTS
+             * AND ALL I CAN REMEMBER THAT ONE OF THEIRS' DEFAULT WAS TO SERIALIZE/DESERIALIZE CASE-INSENSITIVE
+            */
             var content = JsonSerializer.Deserialize<T>(body);
             
             return ApiResult<T>.Success(content);

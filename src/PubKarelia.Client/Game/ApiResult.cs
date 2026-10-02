@@ -24,6 +24,7 @@ public sealed class ApiResult<TValue>
     private TValue? _data;
 
     // Data is the models that we deserialize from the responses, so we are required to keep this generic.
+    // How do we deal with a situation when the data they access is actually null or something? should they always just check?
     public TValue? Data
     {
         get
