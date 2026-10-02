@@ -23,14 +23,10 @@ internal class App
                 Console.WriteLine("Input has to be number.");
 
             if (input == 1)
-            {
                 RunAssignments();
-            }
 
             else if (input == 2)
-            {
                 ResetProgression();
-            }
 
             else
                 break;

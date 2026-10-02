@@ -75,16 +75,8 @@ public class GameClient
     public async Task<ApiResult<string>> GetJoke()
         => await SendAsync<string>(HttpMethod.Get, ApiRoutes.GetJoke);
 
-
-    //// GET
-    //public async Task<string> ThrowDart()
-    //{
-    //    var response = await _httpClient.GetAsync(ApiRoutes.GetJoke);
-
-    //    var joke = await response.Content.ReadAsStringAsync();
-
-    //    return joke;
-    //}
+    public async Task<ApiResult<string>> ThrowDart()
+        => await SendAsync<string>(HttpMethod.Get, ApiRoutes.ThrowDart);
 
     // Help - low priority
 
