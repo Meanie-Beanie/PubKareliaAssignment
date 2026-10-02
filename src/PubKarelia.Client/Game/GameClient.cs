@@ -24,9 +24,10 @@ public class GameClient
     {
         try
         {
-            HttpRequestMessage message = new HttpRequestMessage(method: httpVerb, requestUri: requestUri);
+            // if message is null, we'll assign 
+            HttpRequestMessage message = new HttpRequestMessage(method: httpVerb, requestUri: requestUri); 
 
-            var response = await _httpClient.SendAsync(message);
+            using var response = await _httpClient.SendAsync(message);
 
             // 401 Unauthorized
             if (response.StatusCode == HttpStatusCode.Unauthorized)
@@ -77,6 +78,17 @@ public class GameClient
 
     public async Task<ApiResult<string>> ThrowDart()
         => await SendAsync<string>(HttpMethod.Get, ApiRoutes.ThrowDart);
+
+    public async Task<ApiResult<string>> GetMoominLemonade()
+        => await SendAsync<string>(HttpMethod.Get, ApiRoutes.GetMoominLemonade);
+
+    //public async Task<ApiResult<string>> OrderPizza(int toppingsCount = 0)
+    //{
+    //    if (toppingsCount > 5 || toppingsCount < 0)
+    //        throw new ArgumentOutOfRangeException("Only 0 to 5 toppings allowed."); // Technically could be ArgumentException? I kinda only see this for data structure limits.
+
+    //    var result = await SendAsync<string>(HttpMethod.Get, ApiRoutes.OrderPizza + );
+    //}
 
     // Help - low priority
 
