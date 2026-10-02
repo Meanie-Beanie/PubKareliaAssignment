@@ -42,7 +42,7 @@ public sealed class ApiResult<TValue>
     }   
 
     // 200 is the most common, but there is also 201 and I feel like I am forgetting something else as well, but let's make that default.
-    public static ApiResult<TValue> Success(TValue data, HttpStatusCode statusCode = HttpStatusCode.OK)
+    public static ApiResult<TValue> Success(TValue? data, HttpStatusCode statusCode = HttpStatusCode.OK)
     => new(isSuccess: true, statusCode: statusCode, data: data, errorMessage: null);
 
     // We have to return default of the data type for now.

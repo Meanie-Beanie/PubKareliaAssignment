@@ -40,11 +40,11 @@ public class GameClient
             // catch anything else.
             response.EnsureSuccessStatusCode();
 
-
-            // to-do: 200 ok (201) responses can be without body (maybe, I can't remember, check tomorrow? in any case, good to have)
-            // so this currently will throw an exception.
-            // actually, I just realize as I am typing this.. check out how result logic was done because the class holding the data might cause issue with empty/null values
             var body = await response.Content.ReadAsStringAsync();
+
+            // We have to use default keyword with generics and to be honest, it is good practice outside of them as well
+            if (string.IsNullOrWhiteSpace(body))
+                return ApiResult<T>.Success(default); 
 
             var content = JsonSerializer.Deserialize<T>(body);
             
