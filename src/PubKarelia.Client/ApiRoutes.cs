@@ -9,6 +9,8 @@ internal static class ApiRoutes
     public const string Base = "https://pubkareliaapi20250319124213-g2f5c0apewdcb7ae.northeurope-01.azurewebsites.net/PubKarelia";
 
     // GET
+
+    public const string CurrentPosition = Base + "/CurrentPosition";
     public const string GetJoke = Base + "/GetJoke";
     public const string ThrowDart = Base + "/ThrowDart";
     public const string GetMoominLemonade = Base + "/GetMoominLemonade";

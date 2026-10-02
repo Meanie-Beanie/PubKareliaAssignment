@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Text.Json;
 using System.Net;
+using PubKarelia.Client.Dto;
 
 namespace PubKarelia.Client.Game;
 
@@ -12,6 +13,9 @@ namespace PubKarelia.Client.Game;
 public class GameClient
 {
     readonly HttpClient _httpClient;
+    private int currentPosition = 0;
+
+    private bool firstMove = false;
 
     public GameClient(HttpClient httpClient)
     {
@@ -20,13 +24,11 @@ public class GameClient
 
     // Required headers are currently placed in the Main() when creating HttpClient
     // Do we need body?
-    private async Task<ApiResult<T>> SendAsync<T>(HttpMethod httpVerb, string requestUri)
+    private async Task<ApiResult<T>> SendAsync<T>(HttpRequestMessage message)
     {
         try
         {
             // if message is null, we'll assign 
-            HttpRequestMessage message = new HttpRequestMessage(method: httpVerb, requestUri: requestUri); 
-
             using var response = await _httpClient.SendAsync(message);
 
             // 401 Unauthorized
@@ -72,23 +74,34 @@ public class GameClient
         }
     }
 
-    // GET
+
     public async Task<ApiResult<string>> GetJoke()
-        => await SendAsync<string>(HttpMethod.Get, ApiRoutes.GetJoke);
+        => await SendAsync<string>(new HttpRequestMessage(HttpMethod.Get, ApiRoutes.GetJoke));
 
     public async Task<ApiResult<string>> ThrowDart()
-        => await SendAsync<string>(HttpMethod.Get, ApiRoutes.ThrowDart);
+        => await SendAsync<string>(new HttpRequestMessage(HttpMethod.Get, ApiRoutes.ThrowDart));
 
     public async Task<ApiResult<string>> GetMoominLemonade()
-        => await SendAsync<string>(HttpMethod.Get, ApiRoutes.GetMoominLemonade);
+        => await SendAsync<string>(new HttpRequestMessage(HttpMethod.Get, ApiRoutes.GetMoominLemonade));
 
-    //public async Task<ApiResult<string>> OrderPizza(int toppingsCount = 0)
-    //{
-    //    if (toppingsCount > 5 || toppingsCount < 0)
-    //        throw new ArgumentOutOfRangeException("Only 0 to 5 toppings allowed."); // Technically could be ArgumentException? I kinda only see this for data structure limits.
+    public async Task<ApiResult<string>> OrderPizza(int toppingsCount = 1)
+    {
+        if (toppingsCount > 5 || toppingsCount < 1)
+            throw new ArgumentOutOfRangeException("Only 1 to 5 toppings allowed."); // Technically could be ArgumentException? I kinda only see this for data structure limits.
 
-    //    var result = await SendAsync<string>(HttpMethod.Get, ApiRoutes.OrderPizza + );
-    //}
+        var uriWithParameters = ApiRoutes.OrderPizza + $"?ToppingsCount={toppingsCount}";
+
+        return await SendAsync<string>(new HttpRequestMessage(HttpMethod.Get, uriWithParameters));
+    }
+
+    public async Task<ApiResult<List<string>>> ReadMessages()
+        => await SendAsync<List<string>>(new HttpRequestMessage(HttpMethod.Get, ApiRoutes.ReadMessages));
+
+    // PUT
+    public async Task<ApiResult<string>> Move(int xCoordinates, int yCoordinates)
+    {
+
+    }
 
     // Help - low priority
 

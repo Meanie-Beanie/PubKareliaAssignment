@@ -15,6 +15,9 @@ internal class App
 
     public async Task Start()
     {
+        // 
+        await _gameClient.UpdateCurrentPosition();
+
         while (true)
         {
             Console.WriteLine("Press \"1\" to run all required assignments in succession. \n Press \"2\" to reset progression. \n Press any other key to exit.");
