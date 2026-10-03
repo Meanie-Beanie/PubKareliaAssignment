@@ -26,6 +26,9 @@ public class HtmlClientHelper
             // if message is null, we'll assign 
             using var response = await _httpClient.SendAsync(message);
 
+            // To-do:
+            // Responses can contain valuable data even in negative status codes, so maybe we redesign but do it later.
+            #region rethinkthiswholething
             // 401 Unauthorized
             if (response.StatusCode == HttpStatusCode.Unauthorized)
                 return ApiResult<T>.Failure(HttpStatusCode.Unauthorized, "TIKO AUTH -header missing.");
@@ -37,6 +40,7 @@ public class HtmlClientHelper
 
             // catch anything else.
             response.EnsureSuccessStatusCode();
+            #endregion
 
             var body = await response.Content.ReadAsStringAsync();
 
