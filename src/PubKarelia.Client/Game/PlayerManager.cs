@@ -25,6 +25,10 @@ internal class PlayerManager
 
     public bool CanMove(int distanceX, int distanceY)
     {
+        // Movement only allowed within 0 to 1000 range.
+        if (distanceX < 0 || distanceY < 0)
+            return false;
+
         // only First move can go past Max Movement
         if (HasCompletedFirstMove && distanceX > maxMovement || distanceY > maxMovement)
             return false;

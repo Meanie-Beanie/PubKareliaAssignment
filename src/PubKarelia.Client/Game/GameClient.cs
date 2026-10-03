@@ -11,19 +11,19 @@ namespace PubKarelia.Client.Game;
 // Will change a lot as it is being designed
 // Actually, return types can widely vary and need to be uniform.
 // I do not want to throw errors for each, so will be using Result -pattern
-public class GameClient
+internal class GameClient
 {
+    readonly PlayerManager _playerManager;
     readonly HtmlClientHelper _httpClient;
 
-    private Coordinates _PlayerCoordinates;
     private int _maxMovementDistanceAfterFirstMove = 50;
 
     private bool firstMove = true;
 
-    public GameClient(HtmlClientHelper httpHelper, Coordinates playerCoordinates)
+    public GameClient(HtmlClientHelper httpHelper, PlayerManager playerManager)
     {
         _httpClient = httpHelper;
-        _PlayerCoordinates = playerCoordinates;    
+        _playerManager = playerManager;
     }
 
     // GET
@@ -44,7 +44,7 @@ public class GameClient
         if (toppingsCount > 5 || toppingsCount < 1)
             throw new ArgumentOutOfRangeException("Only 1 to 5 toppings allowed."); // Technically could be ArgumentException? I kinda only see this for data structure limits.
 
-        var uriWithParameters = ApiRoutes.OrderPizza + $"?ToppingsCount={toppingsCount}";
+        var uriWithParameters = ApiRoutes.OrderPizza(toppingsCount);
 
         return await _httpClient.SendAsync<string>(new HttpRequestMessage(HttpMethod.Get, uriWithParameters));
     }
@@ -60,13 +60,14 @@ public class GameClient
     // cannot go outside below 0 or above 1000 boundaries
     public async Task<ApiResult<string>> Move(int xCoordinates, int yCoordinates)
     {
-        /*
-         * We could turn the playerCoordinates into an actual proper Player class and make a method in there for this purpose, but I think maybe we'll just do it the lazy way.
-        */
-        if (!firstMove && (xCoordinates > _maxMovementDistanceAfterFirstMove || yCoordinates > _maxMovementDistanceAfterFirstMove))
-            return ApiResult<string>.Failure(HttpStatusCode.BadRequest, "Cannot move pas");
+        // An issue as it is non-descriptive, it can be for many reasons. Could apply Result pattern for this or simply tuple or something
+        // but we'll keep it like this for now because the scale keeps getting bigger.
+        if (!_playerManager.CanMove(xCoordinates, yCoordinates))
+            return ApiResult<string>.Failure(HttpStatusCode.BadRequest, "Invalid movements.");
 
+        var uriWithParameters = ApiRoutes.Move(xCoordinates, yCoordinates);
 
+        return await _httpClient.SendAsync<string>(new HttpRequestMessage(HttpMethod.Put, uriWithParameters));
     }
 
     // Help - low priority
