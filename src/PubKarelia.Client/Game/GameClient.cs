@@ -16,10 +16,6 @@ internal class GameClient
     readonly PlayerManager _playerManager;
     readonly HtmlClientHelper _httpClient;
 
-    private int _maxMovementDistanceAfterFirstMove = 50;
-
-    private bool firstMove = true;
-
     public GameClient(HtmlClientHelper httpHelper, PlayerManager playerManager)
     {
         _httpClient = httpHelper;
@@ -54,10 +50,7 @@ internal class GameClient
 
     // PUT
 
-    // We have certain rules:
-    // +-50 pixels allowed max movement PER direction. So 50 X and -Y is still allowed. unless first move
-    // Can first mo ve go as long as possible??
-    // cannot go outside below 0 or above 1000 boundaries
+    // PlayerManager has quite a bit of checks before we even finish completing a call to the endpoint.
     public async Task<ApiResult<string>> Move(int xCoordinates, int yCoordinates)
     {
         // An issue as it is non-descriptive, it can be for many reasons. Could apply Result pattern for this or simply tuple or something
