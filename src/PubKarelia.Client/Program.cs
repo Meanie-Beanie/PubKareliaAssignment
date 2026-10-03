@@ -30,7 +30,7 @@ internal class Program
         if (startingPosition.Data is null)
             throw new InvalidOperationException("Unable to get the player starting position.");
 
-        var playerStartingCoordinates = new PlayerCoordinates(startingPosition.Data.X, startingPosition.Data.Y);
+        var playerStartingCoordinates = new Coordinates(startingPosition.Data.X, startingPosition.Data.Y);
 
         App app = new(httpClient, new GameClient(httpHelper, playerStartingCoordinates));
 

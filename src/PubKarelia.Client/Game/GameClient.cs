@@ -15,18 +15,15 @@ public class GameClient
 {
     readonly HtmlClientHelper _httpClient;
 
-    private PlayerCoordinates _PlayerCoordinates;
+    private Coordinates _PlayerCoordinates;
+    private int _maxMovementDistanceAfterFirstMove = 50;
 
     private bool firstMove = true;
 
-    public GameClient(HtmlClientHelper httpHelper, PlayerCoordinates playerCoordinates)
+    public GameClient(HtmlClientHelper httpHelper, Coordinates playerCoordinates)
     {
         _httpClient = httpHelper;
-        _PlayerCoordinates = playerCoordinates;
-
-        // If there are coordinates, player has moved.
-        if (_PlayerCoordinates.x != 0 || _PlayerCoordinates.y != 0)
-            firstMove = false;
+        _PlayerCoordinates = playerCoordinates;    
     }
 
     // GET
@@ -56,18 +53,19 @@ public class GameClient
         => await _httpClient.SendAsync<List<string>>(new HttpRequestMessage(HttpMethod.Get, ApiRoutes.ReadMessages));
 
     // PUT
-    public async Task<ApiResult<string>> Move(int xCoordinates, int yCoordinates)
-    {
-        if (firstMove)
-
-    }
 
     // We have certain rules:
     // +-50 pixels allowed max movement PER direction. So 50 X and -Y is still allowed. unless first move
     // Can first mo ve go as long as possible??
     // cannot go outside below 0 or above 1000 boundaries
-    private bool CheckMovement(int x, int y)
+    public async Task<ApiResult<string>> Move(int xCoordinates, int yCoordinates)
     {
+        /*
+         * We could turn the playerCoordinates into an actual proper Player class and make a method in there for this purpose, but I think maybe we'll just do it the lazy way.
+        */
+        if (!firstMove && (xCoordinates > _maxMovementDistanceAfterFirstMove || yCoordinates > _maxMovementDistanceAfterFirstMove))
+            return ApiResult<string>.Failure(HttpStatusCode.BadRequest, "Cannot move pas");
+
 
     }
 
