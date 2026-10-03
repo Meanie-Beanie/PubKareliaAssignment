@@ -58,6 +58,16 @@ public class GameClient
     // PUT
     public async Task<ApiResult<string>> Move(int xCoordinates, int yCoordinates)
     {
+        if (firstMove)
+
+    }
+
+    // We have certain rules:
+    // +-50 pixels allowed max movement PER direction. So 50 X and -Y is still allowed. unless first move
+    // Can first mo ve go as long as possible??
+    // cannot go outside below 0 or above 1000 boundaries
+    private bool CheckMovement(int x, int y)
+    {
 
     }
 
