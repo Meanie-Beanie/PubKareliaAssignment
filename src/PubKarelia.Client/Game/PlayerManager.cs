@@ -6,6 +6,8 @@ namespace PubKarelia.Client.Game;
 
 internal class PlayerManager
 {
+    public string PlayerName { get; init; }
+
     public bool HasCompletedFirstMove { get; private set; } = false;
 
     // How many pixels can a player move in a turn OUTSIDE first move.
@@ -15,9 +17,10 @@ internal class PlayerManager
     public Coordinates MaximumMapSize { get; init; } = new Coordinates(X: 1000, Y: 1000);
 
 
-    public PlayerManager(Coordinates playerCoordinates)
+    public PlayerManager(Coordinates playerCoordinates, string name)
     {
         PlayerCoordinates = playerCoordinates;
+        PlayerName = name;
     }
 
     public void UpdatePlayerCoordinates(Coordinates playerCoordinates)

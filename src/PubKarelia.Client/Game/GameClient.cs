@@ -5,6 +5,8 @@ using System.Text.Json;
 using System.Net;
 using PubKarelia.Client.Dto;
 using PubKarelia.Client.Util;
+using PubKarelia.Client.Model;
+using System.Net.Http.Json;
 
 namespace PubKarelia.Client.Game;
 
@@ -22,7 +24,7 @@ internal class GameClient
         _playerManager = playerManager;
     }
 
-    // GET
+    /* GET */
     public async Task<ApiResult<CurrentPositionDto>> CurrentPosition()
         => await _httpClient.SendAsync<CurrentPositionDto>(new HttpRequestMessage(HttpMethod.Get, ApiRoutes.CurrentPosition));
 
@@ -48,7 +50,7 @@ internal class GameClient
     public async Task<ApiResult<List<string>>> ReadMessages()
         => await _httpClient.SendAsync<List<string>>(new HttpRequestMessage(HttpMethod.Get, ApiRoutes.ReadMessages));
 
-    // PUT
+    /* PUT */
 
     // PlayerManager has quite a bit of checks before we even finish completing a call to the endpoint.
     public async Task<ApiResult<string>> Move(int xCoordinates, int yCoordinates)
@@ -60,8 +62,47 @@ internal class GameClient
 
         var uriWithParameters = ApiRoutes.Move(xCoordinates, yCoordinates);
 
-        return await _httpClient.SendAsync<string>(new HttpRequestMessage(HttpMethod.Put, uriWithParameters));
+        var result = await _httpClient.SendAsync<string>(new HttpRequestMessage(HttpMethod.Put, uriWithParameters));
+
+        // since it succeeded, update the coordinates.
+        if (result.IsSuccess)
+            _playerManager.UpdatePlayerCoordinates(new(xCoordinates, yCoordinates));
+
+        return result;
     }
+
+    public async Task<ApiResult<string>> WC()
+        => await _httpClient.SendAsync<string>(new HttpRequestMessage(HttpMethod.Put, ApiRoutes.WC));
+
+
+
+
+    /* POST */
+    public async Task<ApiResult<string>> WriteMessage(string title, string message, string author = "")
+    {
+        // We'll throw, since we are not supposed to be using this with empty details anyways and returning result I feel like gives a wrong impression.
+        if (string.IsNullOrWhiteSpace(title) || string.IsNullOrWhiteSpace(message))
+            throw new ArgumentException($"{nameof(title)} or {nameof(message)} cannot be empty or null.");
+
+        // If author isn't empty, we'll use it but if it is, we'll get the player name instead.
+        author = (string.IsNullOrWhiteSpace(author)) ? _playerManager.PlayerName : author;
+
+        GuestBookEntry entry = new GuestBookEntry(title, message, author);
+
+        using HttpRequestMessage httpMessage = new HttpRequestMessage(HttpMethod.Post, ApiRoutes.WriteMessage);
+        httpMessage.Content = JsonContent.Create(entry); // HttpContent, my archnemesis. I would rather use PostAsAsync with httpclient, but alas.
+
+        return await _httpClient.SendAsync<string>(httpMessage);
+    }
+
+    /* DELETE */
+
+    public async Task<ApiResult<string>> WCFlush()
+        => await _httpClient.SendAsync<string>(new HttpRequestMessage(HttpMethod.Delete, ApiRoutes.WCFlush));
+
+    public async Task<ApiResult<string>> Reset()
+    => await _httpClient.SendAsync<string>(new HttpRequestMessage(HttpMethod.Delete, ApiRoutes.Reset));
+
 
     // Help - low priority
 

@@ -31,7 +31,7 @@ internal class Program
             throw new InvalidOperationException("Unable to get the player starting position.");
 
         var playerStartingCoordinates = new Coordinates(startingPosition.Data.X, startingPosition.Data.Y);
-        PlayerManager playerManager = new PlayerManager(playerStartingCoordinates);
+        PlayerManager playerManager = new PlayerManager(playerStartingCoordinates, name: "Olli");
 
         App app = new(httpClient, new GameClient(httpHelper, playerManager));
 
