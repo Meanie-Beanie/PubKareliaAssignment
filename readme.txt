@@ -20,3 +20,8 @@ Project contains no api key and requires user to provide the api key instead. Th
 Note: Run it in the project folder, if you are running it from VS straight, you might need to add --project src/PubKarelia.Client in the end.
 
 
+# Extra
+
+Currently contains PubGridMap with each area gridded. The assignment does not have this by default and you have to guestimate movement, but this will help with that.
+
+The map area is 1000 pixels X and Y. 0,0 being at the very top.
