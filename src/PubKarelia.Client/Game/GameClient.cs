@@ -26,7 +26,23 @@ internal class GameClient
 
     /* GET */
     public async Task<ApiResult<CurrentPositionDto>> CurrentPosition()
-        => await _httpClient.SendAsync<CurrentPositionDto>(new HttpRequestMessage(HttpMethod.Get, ApiRoutes.CurrentPosition));
+    {
+        var result = await _httpClient.SendAsync<CurrentPositionDto>(new HttpRequestMessage(HttpMethod.Get, ApiRoutes.CurrentPosition));
+
+        // So in my opinion, this is abit badly designed.
+        // the api returns 404 IF the user has not moved from the start, why not just return OK WITH the starting coordinates.
+        // I think it might be related that maybe it checks some other variable, like history or something. who knows.
+        // We'll use this really bad code to deal with this situation
+        if (result.StatusCode == HttpStatusCode.NotFound)
+        {
+            // and yes, those are the starting location from the docs. We'll fix this later.
+            return ApiResult<CurrentPositionDto>.Success(new CurrentPositionDto() { X = 500, Y = 900 });
+        }
+
+        else
+            return result;
+    }
+
 
     public async Task<ApiResult<string>> GetJoke()
         => await _httpClient.SendAsync<string>(new HttpRequestMessage(HttpMethod.Get, ApiRoutes.GetJoke));
