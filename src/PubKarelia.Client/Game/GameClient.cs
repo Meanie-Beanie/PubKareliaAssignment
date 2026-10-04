@@ -73,7 +73,7 @@ internal class GameClient
     {
         // An issue as it is non-descriptive, it can be for many reasons. Could apply Result pattern for this or simply tuple or something
         // but we'll keep it like this for now because the scale keeps getting bigger.
-        if (!_playerManager.CanMove(xCoordinates, yCoordinates))
+        if (!_playerManager.CanMove(new(xCoordinates, yCoordinates)))
             return ApiResult<string>.Failure(HttpStatusCode.BadRequest, "Invalid movements.");
 
         var uriWithParameters = ApiRoutes.Move(xCoordinates, yCoordinates);

@@ -26,11 +26,10 @@ internal class Program
         // We'll get the starting position of the player for the game.
         var startingPosition = await httpHelper.SendAsync<CurrentPositionDto>(new HttpRequestMessage(HttpMethod.Get, ApiRoutes.CurrentPosition));
 
-        // We'll ensure we get the player position
-        if (startingPosition.Data is null)
-            throw new InvalidOperationException("Unable to get the player starting position.");
+        // If data is null, which happens if player is at start and the api returns 404, we know it is EITHER calling a dead endpoint OR they are at start.
+        var coordinates = startingPosition.Data is null ? new() { X= Constants.startingCoordinatesX, Y = Constants.startingCoordinatesY} : startingPosition.Data;
 
-        var playerStartingCoordinates = new Coordinates(startingPosition.Data.X, startingPosition.Data.Y);
+        var playerStartingCoordinates = new Coordinates(coordinates.X, coordinates.Y);
         PlayerManager playerManager = new PlayerManager(playerStartingCoordinates, name: "Olli");
 
         App app = new(httpClient, new GameClient(httpHelper, playerManager));

@@ -26,17 +26,18 @@ internal class PlayerManager
     public void UpdatePlayerCoordinates(Coordinates playerCoordinates)
         => PlayerCoordinates = playerCoordinates;
 
-    public bool CanMove(int distanceX, int distanceY)
+    public bool CanMove(Coordinates desiredLocation)
     {
+        if (desiredLocation is null)
+            throw new ArgumentException("No coordinates for player's travel location given.");
+
         // Movement only allowed within 0 to 1000 range.
-        if (distanceX < 0 || distanceY < 0)
+        if (desiredLocation.X < 0 || desiredLocation.Y < 0)
             return false;
 
         // only First move can go past Max Movement
-        if (HasCompletedFirstMove && distanceX > maxMovement || distanceY > maxMovement)
+        if (HasCompletedFirstMove && (desiredLocation.X > maxMovement || desiredLocation.Y > maxMovement))
             return false;
-
-        var desiredLocation = new Coordinates(distanceX + PlayerCoordinates.X, distanceY + PlayerCoordinates.Y);
 
         // If first move has not been completed, it has special rules and we'll check them here.
         if (!HasCompletedFirstMove)

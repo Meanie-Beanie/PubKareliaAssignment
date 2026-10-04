@@ -4,25 +4,20 @@ namespace PubKarelia.Client;
 
 internal class App
 {
-    readonly HttpClient _httpClient; // Maybe comes in useful, keeping it in for now.
     readonly GameClient _gameClient;
 
     public App(HttpClient httpClient, GameClient gameClient)
     {
-        _httpClient = httpClient;
         _gameClient = gameClient;
     }
 
     public async Task Start()
     {
-        // 
-        await _gameClient.UpdateCurrentPosition();
-
         while (true)
         {
             Console.WriteLine("Press \"1\" to run all required assignments in succession. \n Press \"2\" to reset progression. \n Press any other key to exit.");
 
-            if (int.TryParse(Console.ReadLine(), out var input))
+            if (!int.TryParse(Console.ReadLine(), out var input))
                 Console.WriteLine("Input has to be number.");
 
             if (input == 1)
@@ -50,13 +45,19 @@ internal class App
         //}
     }
 
-    private void RunAssignments()
+    private async void RunAssignments()
     {
-        throw new NotImplementedException();
+        //first move
+
+        await _gameClient.Move(200, 680);
+        var joke = await _gameClient.GetJoke();
+        Console.WriteLine(joke.Data);
+
+        ResetProgression();
     }
 
-    private void ResetProgression()
+    private async void ResetProgression()
     {
-            throw new NotImplementedException();
+        await _gameClient.Reset();
     }
 }

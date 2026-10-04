@@ -21,18 +21,7 @@ public sealed class ApiResult<TValue>
     public string? ErrorMessage { get; init; } = null;
 
 
-    private TValue? _data;
-
-    // Data is the models that we deserialize from the responses, so we are required to keep this generic.
-    // How do we deal with a situation when the data they access is actually null or something? should they always just check?
-    public TValue? Data
-    {
-        get
-            => IsSuccess ? _data : throw new InvalidOperationException("Trying to access data that does not exist.");
-
-        init
-            => _data = value;
-    }
+    public TValue? Data { get; init; }
 
     private ApiResult(bool isSuccess, HttpStatusCode statusCode, TValue? data, string? errorMessage)
     {
