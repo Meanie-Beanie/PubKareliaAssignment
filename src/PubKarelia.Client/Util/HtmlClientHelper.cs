@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Net;
+using System.Net.Mime;
 using System.Text;
 using System.Text.Json;
 
@@ -19,61 +20,69 @@ public class HtmlClientHelper
 
     // Required headers are currently placed in the Main() when creating HttpClient
     // Do we need body?
-    public async Task<ApiResult<T>> SendAsync<T>(HttpRequestMessage message)
+    public async Task<ApiResult<TValue>> SendAsync<TValue>(HttpRequestMessage message)
     {
         try
         {
-            // if message is null, we'll assign 
             using var response = await _httpClient.SendAsync(message);
+            var body = await response.Content.ReadAsStringAsync();
 
-            // To-do:
-            // Responses can contain valuable data even in negative status codes, so maybe we redesign but do it later.
-            #region rethinkthiswholething
             // 401 Unauthorized
             if (response.StatusCode == HttpStatusCode.Unauthorized)
-                return ApiResult<T>.Failure(HttpStatusCode.Unauthorized, "TIKO AUTH -header missing.");
+                return ApiResult<TValue>.Failure(HttpStatusCode.Unauthorized, body);
 
             // 400 Bad Request
-            // Think about this later, since body content might contain interesting details.
             else if (response.StatusCode == HttpStatusCode.BadRequest)
-                return ApiResult<T>.Failure(HttpStatusCode.BadRequest, "Unable to do the action in current location.");
+                return ApiResult<TValue>.Failure(HttpStatusCode.BadRequest, body);
 
+            // 404 Not Found
             else if (response.StatusCode == HttpStatusCode.NotFound)
-                return ApiResult<T>.Failure(HttpStatusCode.NotFound, "Not found.");
-
-
-            // catch anything else.
-            response.EnsureSuccessStatusCode();
-            #endregion
-
-            var body = await response.Content.ReadAsStringAsync();
+                return ApiResult<TValue>.Failure(HttpStatusCode.NotFound, body);
 
             // We have to use default keyword with generics and to be honest, it is good practice outside of them as well
             if (string.IsNullOrWhiteSpace(body))
-                return ApiResult<T>.Success(default);
+                return ApiResult<TValue>.Success(default);
 
-            /*
-             * TO-DO:
-             * CHECK THE SERIALIZER OPTIONS
-             * NEWTONSOFT AND NET SERIALIZER HAVE DIFFERENT BEHAVIORS WITH SPECIFIC ASPECTS
-             * AND ALL I CAN REMEMBER THAT ONE OF THEIRS' DEFAULT WAS TO SERIALIZE/DESERIALIZE CASE-INSENSITIVE
-            */
-            var content = JsonSerializer.Deserialize<T>(body);
+            // Wisdom from StackOverflow from 17 years ago. This stumped me but this is sadly the best solution for this current problem
+            // we have to do this check because otherwise we'll serialize the data and we'll run into an issue with purely string body.
+            if (typeof(TValue) == typeof(string))
+            {
+                // This pasta is served by:
+                // https://stackoverflow.com/questions/39244449/cast-generic-type-parameter-to-a-specific-type-in-c-sharp
+                // but I am actually quite stumped if there is a better way of handling this, but it'll work for now.
+                return ApiResult<TValue>.Success((TValue)(object)body); 
+            }
 
-            return ApiResult<T>.Success(content);
+
+            // Could do with improvement but we'll check if response contains application/json and therefore can be serialized.
+            if (response.Content.Headers.ContentType is not null && response.Content.Headers.ContentType.MediaType == "application/json")
+            {
+                /*
+                 * TO-DO:
+                 * CHECK THE SERIALIZER OPTIONS
+                 * NEWTONSOFT AND NET SERIALIZER HAVE DIFFERENT BEHAVIORS WITH SPECIFIC ASPECTS
+                 * AND ALL I CAN REMEMBER THAT ONE OF THEIRS' DEFAULT WAS TO SERIALIZE/DESERIALIZE CASE-INSENSITIVE
+                */
+                var content = JsonSerializer.Deserialize<TValue>(body);
+                return ApiResult<TValue>.Success(content);
+            }
+
+
+            else
+                throw new InvalidOperationException("Something wen't wrong.");
         }
 
         // Catches any other HttpRequest Exception, Try no longer throws exception through EnsureSuccessStatusCode
         catch (HttpRequestException ex)
         {
-            return ApiResult<T>.Failure(HttpStatusCode.BadRequest, $"{ex.Message}");
+            return ApiResult<TValue>.Failure(HttpStatusCode.BadRequest, $"{ex.Message}");
         }
 
         // This is kinda the downside of HttpStatusCode in this situation, since we are smuggling our potential server issue as api server issue.
         // Could set it to nullable and have null for these scenarios, but is that good design?
         catch (JsonException ex)
         {
-            return ApiResult<T>.Failure(HttpStatusCode.BadRequest, $"{ex.Message}");
+            return ApiResult<TValue>.Failure(HttpStatusCode.BadRequest, $"{ex.Message}");
         }
     }
 }

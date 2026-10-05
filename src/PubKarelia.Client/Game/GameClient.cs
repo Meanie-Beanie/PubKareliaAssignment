@@ -36,7 +36,7 @@ internal class GameClient
         if (result.StatusCode == HttpStatusCode.NotFound)
         {
             // and yes, those are the starting location from the docs. We'll fix this later.
-            return ApiResult<CurrentPositionDto>.Success(new CurrentPositionDto() { X = 500, Y = 900 });
+            return ApiResult<CurrentPositionDto>.Success(new CurrentPositionDto() { X = Constants.startingCoordinatesX, Y = Constants.startingCoordinatesY });
         }
 
         else
