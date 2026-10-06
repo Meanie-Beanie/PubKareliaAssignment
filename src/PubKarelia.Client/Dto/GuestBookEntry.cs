@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace PubKarelia.Client.Model;
+namespace PubKarelia.Client.Dto;
 
 public class GuestBookEntry
 {

@@ -10,7 +10,12 @@ internal static class ApiRoutes
 
     // GET
 
+    public const string Help = Base + "/Help";
     public const string CurrentPosition = Base + "/CurrentPosition";
+
+    public static string History(int action)
+        => $"{Base + "/History"}?Action={action}";
+
     public const string GetJoke = Base + "/GetJoke";
     public const string ThrowDart = Base + "/ThrowDart";
     public const string GetMoominLemonade = Base + "/GetMoominLemonade";

@@ -5,7 +5,6 @@ using System.Text.Json;
 using System.Net;
 using PubKarelia.Client.Dto;
 using PubKarelia.Client.Util;
-using PubKarelia.Client.Model;
 using System.Net.Http.Json;
 
 namespace PubKarelia.Client.Game;
@@ -25,6 +24,33 @@ internal class GameClient
     }
 
     /* GET */
+
+    public async Task<ApiResult<string>> Help()
+    => await _httpClient.SendAsync<string>(new HttpRequestMessage(HttpMethod.Get, ApiRoutes.Help));
+
+    /// <summary>
+    /// Is not tested, who knows if it works.
+    /// </summary>
+    /// <param name="action">
+    /// 0 = fetched jokes
+    /// 1 = Dart scores
+    /// 2 = WC -visits
+    /// 3 = WC -flushes
+    /// 4 = Drink orders
+    /// 5 = Food orders
+    /// 6 = Moves
+    /// 7 = Writing in the guest book
+    /// </param>
+    /// <returns></returns>
+    public async Task<ApiResult<History>> History(int action)
+    {
+        if (action > 7 && action < 0)
+            throw new ArgumentException("Must be within 0 to 7.");
+
+        var uriWithParameters = ApiRoutes.History(action);
+        return await _httpClient.SendAsync<History>(new HttpRequestMessage(HttpMethod.Get, uriWithParameters));
+    }
+
     public async Task<ApiResult<CurrentPositionDto>> CurrentPosition()
     {
         var result = await _httpClient.SendAsync<CurrentPositionDto>(new HttpRequestMessage(HttpMethod.Get, ApiRoutes.CurrentPosition));
@@ -118,11 +144,4 @@ internal class GameClient
 
     public async Task<ApiResult<string>> Reset()
     => await _httpClient.SendAsync<string>(new HttpRequestMessage(HttpMethod.Delete, ApiRoutes.Reset));
-
-
-    // Help - low priority
-
-    // History - Low priority
-
-    // Position - Low Priority
 }
