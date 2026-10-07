@@ -1,40 +1,59 @@
 ﻿@page "/"
 @using PubKarelia.Client.Game
-@using PubKarelia.Client.Util
 @inject HttpClient httpClient
 
 <input @bind="_coordinates" placeholder="x,y" />
 <button @onclick="Move">Move</button>
+<button @onclick="Reset">Reset</button>
+@if (_error is not null)
+{
+    <span style="color:red; margin-left:8px">@_error</span>
+}
+@if (_clickedCoords is not null)
+{
+    <span style="color:green; margin-left:8px">@_clickedCoords</span>
+}
+
+<div>
+    @foreach (var (x, y) in _history)
+    {
+        <text>@x,@y</text>        <br />
+
+    }
+</div>
+
+
 
 <div style="position:relative; width:1000px; height:1000px;">
-    <img src="KareliaPub.png" width="1000" height="1000" style="position:absolute;" />
-    <svg width="1000" height="1000" style="position:absolute; pointer-events:none;">
+    <img src="KareliaPub.png" width="1000" height="1000" style="position:absolute;" @onclick="GetImageCoordinates" />
+    <svg width="1000" height="1000" id="SVG""  style="position:absolute; pointer-events:none;">
         <polyline points="@string.Join(",", _points)" fill="none" stroke="red" stroke-width="3" />
     </svg>
 </div>
 
 @code {
     private string _coordinates = "";
+    private string _apiKey = "";
+    private string _error = "";
+    private string _clickedCoords = "";
+
+    private int x;
+    private int y;
 
     private List<string> _points = new() { "500, 900" }; // default location and polyline didn't even work if there is no starting coordinates :)
-    private List<string> History = new();
+    private List<(int, int)> _history = new();
 
-    private readonly PlayerManager _playerManager;
-    private readonly GameClient _gameClient;
+    private PlayerManager _playerManager;
 
     public Home()
     {
         _playerManager = new PlayerManager(new(500, 900), "Test");
-
-        // I just noticed I had named it HtmlClientHelper and not HttpClientHelper
-        HtmlClientHelper httpClientHelper = new(httpClient);
-        _gameClient = new(httpClientHelper, _playerManager);
     }
 
-
-    // we need to figure this out
-    private int x;
-    private int y;
+    private async Task GetImageCoordinates(MouseEventArgs e)
+    {
+        _clickedCoords = $"X:{e.OffsetX}, Y: {(e.OffsetY)}";
+    }
 
     private void Move()
     {
@@ -42,6 +61,33 @@
         x = int.Parse(parts[0]);
         y = int.Parse(parts[1]);
 
-        _points.Add($"{x},{y}"); // since SVG uses one string that contains all coordinates like: "100,100, 200, 200, 300, 300" equal to 3 different lines.
+        // If there are elements in history and last done movement is the same than we are trying now, throw error.
+        if (_history.Count > 0 && _history.Last() == (x, y))
+            _error = "Cannot be the same move than last.";
+
+        else if (_playerManager.CanMove(new(x, y)))
+        {
+            _points.Add($"{x},{y}"); // since SVG uses one string that contains all coordinates like: "100,100, 200, 200, 300, 300" equal to 3 different lines.
+            _history.Add((x,y));
+            _playerManager.UpdatePlayerCoordinates(new(x,y));
+        }
+
+        else
+        {
+            if (_playerManager.HasCompletedFirstMove)
+                _error = "You can only move to the maximum of 150 per direction. 0,0 -> 150, 150";
+
+            else
+                _error = "Can't go past 1000x1000.";
+        }
+    }
+
+    private void Reset()
+    {
+        _history = new();
+        _points = new();
+        _playerManager = new PlayerManager(new(500, 900), "Test");
+        _error = "";
+        _clickedCoords = "";
     }
 }

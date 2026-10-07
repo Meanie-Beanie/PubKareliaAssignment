@@ -11,7 +11,7 @@ internal class PlayerManager
     public bool HasCompletedFirstMove { get; private set; } = false;
 
     // How many pixels can a player move in a turn OUTSIDE first move.
-    public int maxMovement { get; } = 50;
+    public int maxMovement { get; } = 150; //Actually is 150, in docs it says 50.
 
     public Coordinates PlayerCoordinates { get; private set; } = new(X: 500, Y: 900);
     public Coordinates MaximumMapSize { get; init; } = new Coordinates(X: 1000, Y: 1000);
@@ -24,7 +24,12 @@ internal class PlayerManager
     }
 
     public void UpdatePlayerCoordinates(Coordinates playerCoordinates)
-        => PlayerCoordinates = playerCoordinates;
+    {
+        if (!HasCompletedFirstMove)
+            HasCompletedFirstMove = true;
+
+        PlayerCoordinates = playerCoordinates;
+    }
 
     public bool CanMove(Coordinates desiredLocation)
     {
@@ -32,11 +37,14 @@ internal class PlayerManager
             throw new ArgumentException("No coordinates for player's travel location given.");
 
         // Movement only allowed within 0 to 1000 range.
-        if (desiredLocation.X < 0 || desiredLocation.Y < 0)
+        if (desiredLocation.X < 0 || desiredLocation.Y < 0 || desiredLocation.X > 1000 || desiredLocation.Y > 1000)
             return false;
 
+
+
         // only First move can go past Max Movement
-        if (HasCompletedFirstMove && (desiredLocation.X > maxMovement || desiredLocation.Y > maxMovement))
+        // Get the actual distance we move by reducing desired location and current location. If that value exceeds max movement, return false.
+        if (HasCompletedFirstMove && (Math.Abs(desiredLocation.X - PlayerCoordinates.X) > maxMovement || Math.Abs(desiredLocation.Y - PlayerCoordinates.Y) > maxMovement))
             return false;
 
         // If first move has not been completed, it has special rules and we'll check them here.
