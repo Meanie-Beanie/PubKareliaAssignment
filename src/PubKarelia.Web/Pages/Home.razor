@@ -1,17 +1,36 @@
 ﻿@page "/"
+@using PubKarelia.Client.Game
+@using PubKarelia.Client.Util
+@inject HttpClient httpClient
 
-<input @bind="coordinates" placeholder="x,y" />
+<input @bind="_coordinates" placeholder="x,y" />
 <button @onclick="Move">Move</button>
 
 <div style="position:relative; width:1000px; height:1000px;">
     <img src="KareliaPub.png" width="1000" height="1000" style="position:absolute;" />
     <svg width="1000" height="1000" style="position:absolute; pointer-events:none;">
-        <line x1="0" y1="0" x2="@x" y2="@y" stroke="red" stroke-width="3" />
+        <polyline points="@string.Join(",", _points)" fill="none" stroke="red" stroke-width="3" />
     </svg>
 </div>
 
 @code {
-    private string coordinates = "";
+    private string _coordinates = "";
+
+    private List<string> _points = new() { "500, 900" }; // default location and polyline didn't even work if there is no starting coordinates :)
+    private List<string> History = new();
+
+    private readonly PlayerManager _playerManager;
+    private readonly GameClient _gameClient;
+
+    public Home()
+    {
+        _playerManager = new PlayerManager(new(500, 900), "Test");
+
+        // I just noticed I had named it HtmlClientHelper and not HttpClientHelper
+        HtmlClientHelper httpClientHelper = new(httpClient);
+        _gameClient = new(httpClientHelper, _playerManager);
+    }
+
 
     // we need to figure this out
     private int x;
@@ -19,8 +38,10 @@
 
     private void Move()
     {
-        var parts = coordinates.Split(',');
+        var parts = _coordinates.Split(',');
         x = int.Parse(parts[0]);
         y = int.Parse(parts[1]);
+
+        _points.Add($"{x},{y}"); // since SVG uses one string that contains all coordinates like: "100,100, 200, 200, 300, 300" equal to 3 different lines.
     }
 }
