@@ -41,7 +41,7 @@
     private int y;
 
     private List<string> _points = new() { "500, 900" }; // default location and polyline didn't even work if there is no starting coordinates :)
-    private List<(int, int)> _history = new();
+    private List<(int, int)> _history = new() {(500,900)};
 
     private PlayerManager _playerManager;
 
@@ -84,8 +84,8 @@
 
     private void Reset()
     {
-        _history = new();
-        _points = new();
+        _history = new() {(500,900)};
+        _points = new() {"500,900"};
         _playerManager = new PlayerManager(new(500, 900), "Test");
         _error = "";
         _clickedCoords = "";
