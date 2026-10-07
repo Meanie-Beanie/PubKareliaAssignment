@@ -1,0 +1,8 @@
+{
+  "name": "pubkareliaassignment",
+  "compatibility_date": "2026-10-07",
+  "assets": {
+    "directory": "./output/wwwroot",
+    "not_found_handling": "single-page-application"
+  }
+}
